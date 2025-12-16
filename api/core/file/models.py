@@ -1,7 +1,7 @@
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.model_runtime.entities.message_entities import ImagePromptMessageContent
 from core.tools.signature import sign_tool_file
@@ -37,6 +37,9 @@ class File(BaseModel):
     # NOTE: dify_model_identity is a special identifier used to distinguish between
     # new and old data formats during serialization and deserialization.
     dify_model_identity: str = FILE_MODEL_IDENTITY
+
+    # Pydantic configuration to ignore extra fields for backward compatibility
+    model_config = ConfigDict(extra="ignore")
 
     id: str | None = None  # message file id
     tenant_id: str

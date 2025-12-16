@@ -331,17 +331,24 @@ def _get_remote_file_info(url: str):
     # Initialize mime_type from filename as fallback
     mime_type = _guess_mime_type(filename)
 
-    resp = ssrf_proxy.head(url, follow_redirects=True)
-    if resp.status_code == httpx.codes.OK:
-        content_disposition = resp.headers.get("Content-Disposition")
-        extracted_filename = _extract_filename(url_path, content_disposition)
-        if extracted_filename:
-            filename = extracted_filename
-            mime_type = _guess_mime_type(filename)
-        file_size = int(resp.headers.get("Content-Length", file_size))
-        # Fallback to Content-Type header if mime_type is still empty
-        if not mime_type:
-            mime_type = resp.headers.get("Content-Type", "").split(";")[0].strip()
+    # Try to get file info via HEAD request, but don't fail if it doesn't work
+    # Some signed URLs (e.g., Tencent COS, AWS S3) may not support HEAD requests
+    try:
+        resp = ssrf_proxy.head(url, follow_redirects=True)
+        if resp.status_code == httpx.codes.OK:
+            content_disposition = resp.headers.get("Content-Disposition")
+            extracted_filename = _extract_filename(url_path, content_disposition)
+            if extracted_filename:
+                filename = extracted_filename
+                mime_type = _guess_mime_type(filename)
+            file_size = int(resp.headers.get("Content-Length", file_size))
+            # Fallback to Content-Type header if mime_type is still empty
+            if not mime_type:
+                mime_type = resp.headers.get("Content-Type", "").split(";")[0].strip()
+    except Exception:
+        # If HEAD request fails (403, timeout, etc.), use filename from URL path
+        # This is common with signed URLs that only support GET requests
+        pass
 
     if not filename:
         extension = mimetypes.guess_extension(mime_type) or ".bin"
