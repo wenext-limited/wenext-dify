@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 import os
 import urllib.parse
@@ -15,6 +16,8 @@ from core.file import File, FileBelongsTo, FileTransferMethod, FileType, FileUpl
 from core.helper import ssrf_proxy
 from extensions.ext_database import db
 from models import MessageFile, ToolFile, UploadFile
+
+logger = logging.getLogger(__name__)
 
 
 def build_from_message_files(
@@ -194,6 +197,7 @@ def _build_from_remote_url(
     strict_type_validation: bool = False,
 ) -> File:
     upload_file_id = mapping.get("upload_file_id")
+    logger.info(f"Processing remote URL with upload_file_id: {upload_file_id}")
     if upload_file_id:
         try:
             uuid.UUID(upload_file_id)
