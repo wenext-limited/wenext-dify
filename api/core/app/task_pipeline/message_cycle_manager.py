@@ -31,7 +31,6 @@ from core.app.entities.task_entities import (
     WorkflowTaskState,
 )
 from core.llm_generator.llm_generator import LLMGenerator
-from core.tools.signature import sign_tool_file
 from extensions.ext_database import db
 from extensions.ext_redis import redis_client
 from models.model import App, AppMode, Conversation, MessageAnnotation, MessageFile

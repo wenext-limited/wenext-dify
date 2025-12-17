@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 
 from sqlalchemy import select
@@ -22,6 +23,8 @@ from models.model import AppMode, Conversation, Message, MessageFile
 from models.workflow import Workflow
 from repositories.api_workflow_run_repository import APIWorkflowRunRepository
 from repositories.factory import DifyAPIRepositoryFactory
+
+logger = logging.getLogger(__name__)
 
 
 class TokenBufferMemory:
@@ -160,6 +163,7 @@ class TokenBufferMemory:
             ).all()
 
             if user_files:
+                logger.info("User files: %s", user_files)
                 user_prompt_message = self._build_prompt_message_with_files(
                     message_files=user_files,
                     text_content=message.query,
