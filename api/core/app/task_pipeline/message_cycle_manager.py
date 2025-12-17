@@ -34,7 +34,7 @@ from core.llm_generator.llm_generator import LLMGenerator
 from core.tools.signature import sign_tool_file
 from extensions.ext_database import db
 from extensions.ext_redis import redis_client
-from models.model import AppMode, Conversation, MessageAnnotation, MessageFile
+from models.model import App, AppMode, Conversation, MessageAnnotation, MessageFile
 from services.annotation_service import AppAnnotationService
 
 logger = logging.getLogger(__name__)
@@ -195,34 +195,31 @@ class MessageCycleManager:
         :param event: event
         :return:
         """
+        from factories import file_factory
+
         with Session(db.engine, expire_on_commit=False) as session:
             message_file = session.scalar(select(MessageFile).where(MessageFile.id == event.message_file_id))
+            app = session.scalar(select(App).where(App.id == self._application_generate_entity.app_id))
 
-        if message_file and message_file.url is not None:
-            # get tool file id
-            tool_file_id = message_file.url.split("/")[-1]
-            # trim extension
-            tool_file_id = tool_file_id.split(".")[0]
-
-            # get extension
-            if "." in message_file.url:
-                extension = f".{message_file.url.split('.')[-1]}"
-                if len(extension) > 10:
-                    extension = ".bin"
-            else:
-                extension = ".bin"
-            # add sign url to local file
-            if message_file.url.startswith("http"):
-                url = message_file.url
-            else:
-                url = sign_tool_file(tool_file_id=tool_file_id, extension=extension)
+        if message_file and app:
+            # 通过factory重新构建，确保签名最新
+            file = file_factory.build_from_mapping(
+                mapping={
+                    "id": message_file.id,
+                    "type": message_file.type,
+                    "transfer_method": message_file.transfer_method,
+                    "upload_file_id": message_file.upload_file_id,
+                    "url": message_file.url,
+                },
+                tenant_id=app.tenant_id,
+            )
 
             return MessageFileStreamResponse(
                 task_id=self._application_generate_entity.task_id,
                 id=message_file.id,
                 type=message_file.type,
                 belongs_to=message_file.belongs_to or "user",
-                url=url,
+                url=file.generate_url(),  # 使用File对象生成的URL
             )
 
         return None
