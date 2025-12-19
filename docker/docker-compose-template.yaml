@@ -21,7 +21,7 @@ services:
 
   # API service
   api:
-    image: langgenius/dify-api:1.11.1
+    image: wenext/dify-api:latest
     restart: always
     environment:
       # Use the shared environment variables.
@@ -63,7 +63,7 @@ services:
   # worker service
   # The Celery worker for processing all queues (dataset, workflow, mail, etc.)
   worker:
-    image: langgenius/dify-api:1.11.1
+    image: wenext/dify-api:latest
     restart: always
     environment:
       # Use the shared environment variables.
@@ -102,7 +102,7 @@ services:
   # worker_beat service
   # Celery beat for scheduling periodic tasks.
   worker_beat:
-    image: langgenius/dify-api:1.11.1
+    image: wenext/dify-api:latest
     restart: always
     environment:
       # Use the shared environment variables.
@@ -132,7 +132,7 @@ services:
 
   # Frontend web application.
   web:
-    image: langgenius/dify-web:1.11.1
+    image: wenext/dify-web:latest
     restart: always
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
@@ -427,7 +427,7 @@ services:
       - api
       - web
     ports:
-      - "${EXPOSE_NGINX_PORT:-80}:${NGINX_PORT:-80}"
+      - "${EXPOSE_NGINX_PORT:-3300}:${NGINX_PORT:-80}"
       - "${EXPOSE_NGINX_SSL_PORT:-443}:${NGINX_SSL_PORT:-443}"
 
   # The Weaviate vector store.

@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 
 from sqlalchemy import select
@@ -22,6 +23,8 @@ from models.model import AppMode, Conversation, Message, MessageFile
 from models.workflow import Workflow
 from repositories.api_workflow_run_repository import APIWorkflowRunRepository
 from repositories.factory import DifyAPIRepositoryFactory
+
+logger = logging.getLogger(__name__)
 
 
 class TokenBufferMemory:
@@ -188,6 +191,7 @@ class TokenBufferMemory:
             else:
                 prompt_messages.append(AssistantPromptMessage(content=message.answer))
 
+        logger.info("Prompt messages: %s", prompt_messages)
         if not prompt_messages:
             return []
 
