@@ -163,7 +163,6 @@ class TokenBufferMemory:
             ).all()
 
             if user_files:
-                logger.info("User files: %s", user_files)
                 user_prompt_message = self._build_prompt_message_with_files(
                     message_files=user_files,
                     text_content=message.query,
@@ -192,6 +191,7 @@ class TokenBufferMemory:
             else:
                 prompt_messages.append(AssistantPromptMessage(content=message.answer))
 
+        logger.info("Prompt messages: %s", prompt_messages)
         if not prompt_messages:
             return []
 
